@@ -163,7 +163,12 @@ body {
     margin-bottom: 10px;
   }
   </style>
-  <script src="./app.js"></script>
+  <script>
+    var script = document.createElement('script');
+    script.src = 'app.js?v=' + new Date().getTime();
+    script.async = true; // or script.defer = true;
+    document.head.appendChild(script);
+</script>
 
 </head>
 <body>

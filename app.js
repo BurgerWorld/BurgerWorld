@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
         height: 500,
     });
 
-    const layer = new Konva.Layer();
+    let layer = new Konva.Layer();
     stage.add(layer);
 
     let backgroundImage = new Konva.Image({
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     layer.add(backgroundImage);
 
-    const transparentRect = new Konva.Rect({
+    let transparentRect = new Konva.Rect({
         x: 0,
         y: 0,
         width: stage.width(),
@@ -25,13 +25,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     layer.add(transparentRect);
 
-    const tr = new Konva.Transformer({
+    let tr = new Konva.Transformer({
         anchorSize: 20,
         padding: 5,
     });
     layer.add(tr);
 
     transparentRect.on('click', function () {
+        console.log('Transparent Rect clicked');
         tr.nodes([]);
         layer.draw();
     });
@@ -39,11 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function addShapeEvents(shape) {
         shape.on('click', function (e) {
             e.cancelBubble = true;
+            console.log('Shape clicked and transformer applied');
             tr.nodes([shape]);
             layer.draw();
         });
 
         shape.on('transformend dragend', function () {
+            console.log('Transform or Drag Ended');
             layer.batchDraw();
         });
     }
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Delete' || e.key === 'Backspace') {
             const selectedNode = tr.nodes()[0];
             if (selectedNode) {
+                console.log('Selected node deleted');
                 selectedNode.destroy();
                 tr.nodes([]);
                 layer.draw();
@@ -62,23 +66,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const stickersPanel = document.getElementById('stickers-panel');
 
     document.getElementById('open-stickers').addEventListener('click', function () {
+        console.log('Stickers panel opened');
         stickersPanel.classList.add('show');
         stickersPanel.style.display = 'grid';
     });
 
     document.getElementById('close-stickers').addEventListener('click', function () {
+        console.log('Stickers panel closed');
         stickersPanel.classList.remove('show');
         stickersPanel.style.display = 'none';
     });
 
     const fileInput = document.getElementById('upload-image');
     fileInput.addEventListener('change', function (e) {
+        console.log('Image uploaded');
         const reader = new FileReader();
         reader.onload = function () {
             const imageObj = new Image();
             imageObj.crossOrigin = "Anonymous";
             imageObj.src = reader.result;
             imageObj.onload = function () {
+                console.log('Background image loaded');
                 backgroundImage.image(imageObj);
                 layer.draw();
             };
@@ -88,10 +96,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('meme-text').addEventListener('click', function () {
+        console.log('Text panel opened');
         document.getElementById('text-panel').style.display = 'block';
     });
 
     document.getElementById('cancel-text-button').addEventListener('click', function () {
+        console.log('Text panel closed');
         document.getElementById('text-panel').style.display = 'none';
     });
 
@@ -108,6 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
             draggable: true,
         });
 
+        console.log('New text added:', newText.text());
+
         layer.add(newText);
         addShapeEvents(newText);
         tr.nodes([newText]);
@@ -119,11 +131,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.sticker').forEach(function (sticker) {
         sticker.addEventListener('click', function () {
+            console.log('Sticker selected:', sticker.alt);
             const stickerImage = new Image();
             stickerImage.crossOrigin = "Anonymous";
             stickerImage.src = sticker.src;
 
             stickerImage.onload = function () {
+                console.log('Sticker image loaded');
                 const konvaSticker = new Konva.Image({
                     x: 50,
                     y: 50,
@@ -141,15 +155,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('reset-canvas').addEventListener('click', function () {
-        layer.removeChildren();
+        console.log('Canvas reset');
+        layer.destroyChildren(); // Remove all elements from the layer
+        backgroundImage = new Konva.Image({
+            x: 0,
+            y: 0,
+            width: stage.width(),
+            height: stage.height(),
+        }); // Re-create the background image
         layer.add(backgroundImage);
-        layer.add(tr);
-        fileInput.value = '';
+        layer.add(transparentRect); // Re-add the transparent rectangle
+        tr.nodes([]); // Clear transformer selection
+        layer.add(tr); // Ensure the transformer is re-added to the layer
+        tr.moveToTop(); // Ensure the transformer is always on top
+        fileInput.value = ''; // Reset the file input
         layer.draw();
     });
 
     document.getElementById('download-meme').addEventListener('click', function (e) {
         e.preventDefault();
+        console.log('Download meme triggered');
         const previousNodes = tr.nodes();
         tr.nodes([]);
         layer.draw();
@@ -163,8 +188,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                console.log('Meme downloaded');
             } catch (err) {
                 console.error('Error saving meme:', err);
+                alert('Export failed. Please try another browser or disable Brave Shields.');
             }
             tr.nodes(previousNodes);
             layer.draw();
@@ -174,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('remove-selected').addEventListener('click', function () {
         const selectedNode = tr.nodes()[0];
         if (selectedNode) {
+            console.log('Selected node removed');
             selectedNode.destroy();
             tr.nodes([]);
             layer.draw();
@@ -189,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
     previewStage.add(previewLayer);
 
     function updatePreview() {
+        console.log('Text preview updated');
         previewLayer.destroyChildren();
 
         const previewText = new Konva.Text({
