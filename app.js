@@ -31,9 +31,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     layer.add(tr);
 
+    function resetTransformer() {
+        tr.nodes([]);
+        layer.add(tr); // Ensure the transformer is added to the layer
+        tr.moveToTop(); // Move transformer to the top of the layer
+    }
+
     transparentRect.on('click', function () {
         console.log('Transparent Rect clicked');
-        tr.nodes([]);
+        resetTransformer();
         layer.draw();
     });
 
@@ -42,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
             e.cancelBubble = true;
             console.log('Shape clicked and transformer applied');
             tr.nodes([shape]);
-            layer.draw();
+            tr.getLayer().batchDraw(); // Force the transformer to update
         });
 
         shape.on('transformend dragend', function () {
@@ -57,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (selectedNode) {
                 console.log('Selected node deleted');
                 selectedNode.destroy();
-                tr.nodes([]);
+                resetTransformer();
                 layer.draw();
             }
         }
@@ -123,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         layer.add(newText);
         addShapeEvents(newText);
         tr.nodes([newText]);
-        tr.forceUpdate();
+        tr.getLayer().batchDraw(); // Ensure the transformer is correctly linked
         layer.draw();
 
         document.getElementById('text-panel').style.display = 'none';
@@ -148,6 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 layer.add(konvaSticker);
                 addShapeEvents(konvaSticker);
                 tr.nodes([konvaSticker]);
+                tr.getLayer().batchDraw(); // Ensure the transformer is correctly linked
                 layer.draw();
                 stickersPanel.style.display = 'none';
             };
@@ -156,19 +163,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('reset-canvas').addEventListener('click', function () {
         console.log('Canvas reset');
-        layer.destroyChildren(); // Remove all elements from the layer
+        
+        // Remove all elements from the layer including transformer
+        layer.destroyChildren();
+        
+        // Recreate the background image
         backgroundImage = new Konva.Image({
             x: 0,
             y: 0,
             width: stage.width(),
             height: stage.height(),
-        }); // Re-create the background image
+        });
         layer.add(backgroundImage);
-        layer.add(transparentRect); // Re-add the transparent rectangle
-        tr.nodes([]); // Clear transformer selection
-        layer.add(tr); // Ensure the transformer is re-added to the layer
-        tr.moveToTop(); // Ensure the transformer is always on top
-        fileInput.value = ''; // Reset the file input
+        
+        // Recreate the transparent rectangle
+        transparentRect = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: stage.width(),
+            height: stage.height(),
+            fill: 'transparent',
+        });
+        layer.add(transparentRect);
+        
+        // Completely recreate the transformer to ensure it's fresh
+        tr.destroy();
+        tr = new Konva.Transformer({
+            anchorSize: 20,
+            padding: 5,
+        });
+        layer.add(tr);
+        
+        // Reattach the click event listener to the transparent rectangle
+        transparentRect.on('click', function () {
+            console.log('Transparent Rect clicked');
+            resetTransformer();
+            layer.draw();
+        });
+
+        // Clear file input
+        fileInput.value = ''; 
+
+        // Redraw the layer to reflect the changes
         layer.draw();
     });
 
@@ -203,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (selectedNode) {
             console.log('Selected node removed');
             selectedNode.destroy();
-            tr.nodes([]);
+            resetTransformer();
             layer.draw();
         }
     });
