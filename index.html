@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meme Generator</title>
+  <style>
+
+@font-face {
+    font-family: 'CooperStdBlack';
+    src: url('Cooper Std Black.ttf') format('truetype');
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #fbe8a6; /* Light Warm Beige/Cream Background */
+    color: #333; /* Dark Gray Text */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    background-color: #ffcc00; /* McDonald's Yellow */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #d52b1e; /* McDonald's Red */
+  }
+
+  p {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #d52b1e; /* McDonald's Red */
+  }
+
+  ol {
+    text-align: left;
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #d52b1e; /* McDonald's Red */
+  }
+
+  #controls {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .control-button {
+    background-color: #d52b1e; /* McDonald's Red */
+    border: none;
+    padding: 10px;
+    margin: 5px;
+    color: #ffcc00; /* McDonald's Yellow */
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .control-button:hover {
+    background-color: #b1201a; /* Slightly darker red on hover */
+  }
+
+  #text-panel,
+  #stickers-panel {
+    background-color: #fff; /* White Background for modals */
+    border-radius: 8px;
+    padding: 20px;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;  /* Width to fit more stickers */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    display: none;
+  }
+
+  .text-input,
+  .color-picker {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+    color: #333; /* Dark Gray Text */
+    height: 44px;
+  }
+
+  #stickers-panel {
+    display: none;
+    grid-template-columns: repeat(4, 1fr); /* 4 stickers per row */
+    gap: 10px; /* Space between stickers */
+    justify-items: center;
+    grid-template-rows: auto auto 50px; /* Allow for a bottom row for the button */
+  }
+
+  #stickers-panel.show {
+    display: grid;
+  }
+
+  .sticker {
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .sticker:hover {
+    transform: scale(1.2); /* Slight hover effect */
+  }
+
+  #close-stickers {
+    grid-column: span 4; /* Make the button span across all columns */
+    align-self: end;
+    background-color: #d52b1e; /* McDonald's Red */
+    border: none;
+    padding: 10px;
+    color: #ffcc00; /* McDonald's Yellow */
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 10px; /* Space between stickers and the button */
+  }
+
+  #close-stickers:hover {
+    background-color: #b1201a; /* Slightly darker red on hover */
+  }
+
+  #meme-stage {
+    margin: 20px auto;
+    border: 2px solid #d52b1e; /* Red border around the meme stage */
+    background-color: #ffcc00; /* Yellow Background for the stage */
+    max-width: 100%;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #text-preview {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+  </style>
+  <script>
+    var script = document.createElement('script');
+    script.src = 'app.js?v=' + new Date().getTime();
+    script.async = true; // or script.defer = true;
+    document.head.appendChild(script);
+</script>
+
+</head>
+<body>
+
+  <div class="container">
+    <h1>Create Your Own Meme!</h1>
+    <p>How does it work?</p>
+    <ol>
+      <li>Begin by uploading your background image</li>
+      <li>Overlay as many memes as you'd like onto the base image</li>
+      <li>(Optional) Add your own custom text</li>
+      <li>Save the final image to your device and hit the grills</li>
+    </ol>
+    
+    <div id="controls">
+      <input type="file" id="upload-image" accept="image/*" hidden>
+      <button class="control-button" onclick="document.getElementById('upload-image').click();">Upload New Background</button>
+      <button class="control-button" id="meme-text">Add Text</button>
+      <button class="control-button" id="open-stickers">Add Sticker</button>
+      <button class="control-button" id="reset-canvas">Reset</button>
+      <button class="control-button" id="remove-selected">Remove Selected Object</button>
+      <button class="control-button" id="download-meme">Save Meme</button>
+    </div>
+    
+    <div id="meme-stage"></div>
+
+    <div id="stickers-panel" class="modal">
+        <h2>Select a Sticker</h2>
+        
+        <!-- Your sticker images -->
+        <img src="./Stickers/Big if True.png" class="sticker" alt="Big if True">
+        <img src="./Stickers/Chilis.png" class="sticker" alt="Chilis">
+        <img src="./Stickers/Goblin Inspection.png" class="sticker" alt="Goblin Inspection">
+        <img src="./Stickers/CTO Caddy.png" class="sticker" alt="CTO Caddy">
+        <img src="./Stickers/Great Again Burger.png" class="sticker" alt="Great Again Burger">
+        <img src="./Stickers/Onion Ring.png" class="sticker" alt="Onion Ring">
+        <img src="./Stickers/Onion.png" class="sticker" alt="Onion">
+        <img src="./Stickers/Help Wanted.png" class="sticker" alt="Help Wanted">
+        <img src="./Stickers/REKT.png" class="sticker" alt="REKT">
+        <img src="./Stickers/Fries.png" class="sticker" alt="Fries">
+        <img src="./Stickers/LFG Bacon.png" class="sticker" alt="LFG Bacon">
+        <img src="./Stickers/Sauce Heart.png" class="sticker" alt="Sauce Heart">
+        <img src="./Stickers/GBurger Cheeses.png" class="sticker" alt="GBurger Cheeses">
+        <img src="./Stickers/Mayo.png" class="sticker" alt="Mayo">
+        <img src="./Stickers/Tomato.png" class="sticker" alt="Tomato">
+        <br><br>
+        <!-- Close button -->
+        <button id="close-stickers" class="control-button">Close</button>
+      </div>
+
+    <div id="text-panel" class="modal">
+      <h2>Add Text</h2>
+     
+      <input type="text" id="new-meme-text" placeholder="ENTER YOUR TEXT HERE" class="text-input">
+      <label for="font-select">Select Font:</label>
+      <select id="font-select" class="text-input">
+        <option value="CooperStdBlack">Cooper Std Black</option>
+        <option value="Impact">Impact</option>
+        <option value="Arial">Arial</option>
+        <option value="Comic Sans MS">Comic Sans</option>
+        
+      </select>
+      <label for="color-picker">Select Font Color:</label>
+      <input type="color" id="color-picker" value="#ffffff" class="color-picker">
+      <label for="stroke-color-picker">Select Stroke Color:</label>
+      <input type="color" id="stroke-color-picker" value="#000000" class="color-picker">
+      <label for="stroke-width-slider">Stroke Width:</label>
+<input type="range" id="stroke-width-slider" min="0" max="3" value="1.5" step="0.1">
+<br>
+<div id="text-preview"></div>
+      <button id="add-text-button" class="control-button">Add</button>
+      <button id="cancel-text-button" class="control-button">Cancel</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+
+</script>
+</body>
+</html>
