@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
     layer.add(transparentRect);
 
     const tr = new Konva.Transformer({
-        anchorSize: 15,  // Increase the size of the anchors for easier interaction
-        padding: 10,     // Increase padding around the node for easier interaction
+        anchorSize: 20,  // Increase the size of the anchor nodes (default is 10)
+        padding: 5,     // Add padding around the transformable object
     });
     layer.add(tr);
 
