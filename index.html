@@ -7,146 +7,154 @@
   <title>Meme Generator</title>
   <style>
 
+/* Font Face */
 @font-face {
     font-family: 'CooperStdBlack';
     src: url('Cooper Std Black.ttf') format('truetype');
 }
 
+/* Color Variables */
+:root {
+    --background-color: #fbe8a6; /* Body Background */
+    --text-color: #333; /* General Text Color */
+    --container-bg-color: #ffcc00; /* Container Background */
+    --heading-color: #d52b1e; /* Heading Text Color */
+    --paragraph-color: #d52b1e; /* Paragraph Text Color */
+    --button-bg-color: #d52b1e; /* Button Background */
+    --button-hover-bg-color: #b1201a; /* Button Background on Hover */
+    --button-text-color: #ffcc00; /* Button Text Color */
+    --panel-bg-color: #fff; /* Panel Background */
+    --panel-border-color: #ccc; /* Panel Border */
+    --meme-stage-border-color: #d52b1e; /* Meme Stage Border */
+    --meme-stage-bg-color: #ffcc00; /* Meme Stage Background */
+}
+
+/* Global Styles */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #fbe8a6; /* Light Warm Beige/Cream Background */
-    color: #333; /* Dark Gray Text */
+    background-color: var(--background-color);
+    color: var(--text-color);
     margin: 0;
     padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-  }
+}
 
-  .container {
+/* Container Styles */
+.container {
     max-width: 800px;
     margin: 0 auto;
     text-align: center;
-    background-color: #ffcc00; /* McDonald's Yellow */
+    background-color: var(--container-bg-color);
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  }
+}
 
-  h1 {
+/* Header and Text Styles */
+h1 {
     font-size: 36px;
     margin-bottom: 10px;
-    color: #d52b1e; /* McDonald's Red */
-  }
+    color: var(--heading-color);
+}
 
-  p {
+p, ol {
     font-size: 20px;
     margin-bottom: 20px;
-    color: #d52b1e; /* McDonald's Red */
-  }
-
-  ol {
+    color: var(--paragraph-color);
     text-align: left;
-    font-size: 18px;
-    margin-bottom: 20px;
-    color: #d52b1e; /* McDonald's Red */
-  }
+}
 
-  #controls {
+/* Responsive Controls */
+#controls {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     margin-bottom: 20px;
-  }
+}
 
-  .control-button {
-    background-color: #d52b1e; /* McDonald's Red */
+.control-button {
+    background-color: var(--button-bg-color);
     border: none;
     padding: 10px;
     margin: 5px;
-    color: #ffcc00; /* McDonald's Yellow */
+    color: var(--button-text-color);
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     flex: 1;
-  }
+}
 
-  .control-button:hover {
-    background-color: #b1201a; /* Slightly darker red on hover */
-  }
+.control-button:hover {
+    background-color: var(--button-hover-bg-color);
+}
 
-  #text-panel,
-  #stickers-panel {
-    background-color: #fff; /* White Background for modals */
+/* Panel Styles */
+#text-panel,
+#stickers-panel {
+    background-color: var(--panel-bg-color);
     border-radius: 8px;
     padding: 20px;
     position: absolute;
     top: 50px;
     left: 50%;
     transform: translateX(-50%);
-    width: 500px;  /* Width to fit more stickers */
+    width: 90%;
+    max-width: 500px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     display: none;
-  }
+}
 
-  .text-input,
-  .color-picker {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-    color: #333; /* Dark Gray Text */
-    height: 44px;
-  }
-
-  #stickers-panel {
+/* Sticker Grid */
+#stickers-panel {
     display: none;
-    grid-template-columns: repeat(4, 1fr); /* 4 stickers per row */
-    gap: 10px; /* Space between stickers */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
     justify-items: center;
-    grid-template-rows: auto auto 50px; /* Allow for a bottom row for the button */
-  }
+    grid-template-rows: auto auto 50px;
+}
 
-  #stickers-panel.show {
+#stickers-panel.show {
     display: grid;
-  }
+}
 
-  .sticker {
+.sticker {
     width: 100px;
     height: 100px;
     cursor: pointer;
     transition: transform 0.3s ease;
-  }
+}
 
-  .sticker:hover {
-    transform: scale(1.2); /* Slight hover effect */
-  }
+.sticker:hover {
+    transform: scale(1.2);
+}
 
-  #close-stickers {
-    grid-column: span 4; /* Make the button span across all columns */
+/* Close Stickers Button */
+#close-stickers {
+    grid-column: span 4;
     align-self: end;
-    background-color: #d52b1e; /* McDonald's Red */
+    background-color: var(--button-bg-color);
     border: none;
     padding: 10px;
-    color: #ffcc00; /* McDonald's Yellow */
+    color: var(--button-text-color);
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
-    margin-top: 10px; /* Space between stickers and the button */
-  }
+    margin-top: 10px;
+}
 
-  #close-stickers:hover {
-    background-color: #b1201a; /* Slightly darker red on hover */
-  }
+#close-stickers:hover {
+    background-color: var(--button-hover-bg-color);
+}
 
-  #meme-stage {
+/* Meme Stage */
+#meme-stage {
     margin: 20px auto;
-    border: 2px solid #d52b1e; /* Red border around the meme stage */
-    background-color: #ffcc00; /* Yellow Background for the stage */
+    border: 2px solid var(--meme-stage-border-color);
+    background-color: var(--meme-stage-bg-color);
     max-width: 100%;
     max-height: 500px;
     width: auto;
@@ -154,14 +162,63 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
+}
 
-  #text-preview {
+/* Text Preview */
+#text-preview {
     width: 100%;
     height: 100px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--panel-border-color);
     margin-bottom: 10px;
-  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+    }
+
+    p, ol {
+        font-size: 16px;
+    }
+
+    .control-button {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    #text-panel,
+    #stickers-panel {
+        width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+
+    p, ol {
+        font-size: 14px;
+    }
+
+    .control-button {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .sticker {
+        width: 80px;
+        height: 80px;
+    }
+
+    #text-panel,
+    #stickers-panel {
+        width: 100%;
+        padding: 15px;
+    }
+}
+
   </style>
   <script>
     var script = document.createElement('script');
