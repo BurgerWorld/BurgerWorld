@@ -105,13 +105,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const stickersPanel = document.getElementById('stickers-panel');
 
     document.getElementById('open-stickers').addEventListener('click', function () {
-        stickersPanel.classList.add('show');
-        stickersPanel.style.display = 'grid';
+        hideAllPanels();
+        showPanel('stickers-panel');
     });
 
     document.getElementById('close-stickers').addEventListener('click', function () {
-        stickersPanel.classList.remove('show');
-        stickersPanel.style.display = 'none';
+        hidePanel('stickers-panel');
     });
 
     const fileInput = document.getElementById('upload-image');
@@ -132,11 +131,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('meme-text').addEventListener('click', function () {
-        document.getElementById('text-panel').style.display = 'block';
+        console.log('Add Text button clicked'); // Add this line for debugging
+        hideAllPanels();
+        showPanel('text-panel');
     });
 
     document.getElementById('cancel-text-button').addEventListener('click', function () {
-        document.getElementById('text-panel').style.display = 'none';
+        hidePanel('text-panel');
     });
 
     document.getElementById('add-text-button').addEventListener('click', function () {
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
             layer.batchDraw();  // Use batchDraw instead of draw for better performance
 
             // Close the text panel
-            document.getElementById('text-panel').style.display = 'none';
+            hidePanel('text-panel');
             
             // Clear the input field
             document.getElementById('new-meme-text').value = '';
@@ -190,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 tr.nodes([konvaSticker]);
                 tr.getLayer().batchDraw();
                 layer.draw();
-                stickersPanel.style.display = 'none';
+                hidePanel('stickers-panel'); // Add this line to close the sticker panel
             };
         });
     });
@@ -369,3 +370,45 @@ function createTextGroup(text, x, y) {
 
     return group;
 }
+
+function showPanel(panelId) {
+    console.log('Showing panel:', panelId); // Add this line for debugging
+    document.getElementById(panelId).classList.add('show');
+}
+
+function hidePanel(panelId) {
+    console.log('Hiding panel:', panelId); // Add this line for debugging
+    document.getElementById(panelId).classList.remove('show');
+}
+
+function hideAllPanels() {
+    console.log('Hiding all panels'); // Add this line for debugging
+    hidePanel('text-panel');
+    hidePanel('stickers-panel');
+}
+
+// Remove these duplicate event listeners if they exist
+// document.getElementById('meme-text').addEventListener('click', function() {
+//     hideAllPanels();
+//     showPanel('text-panel');
+// });
+
+// document.getElementById('open-stickers').addEventListener('click', function() {
+//     hideAllPanels();
+//     showPanel('stickers-panel');
+// });
+
+// document.getElementById('close-stickers').addEventListener('click', function() {
+//     hidePanel('stickers-panel');
+// });
+
+// document.getElementById('cancel-text-button').addEventListener('click', function() {
+//     hidePanel('text-panel');
+// });
+
+// document.getElementById('add-text-button').addEventListener('click', function() {
+//     // Your existing code for adding text
+//     // ...
+
+//     hidePanel('text-panel');
+// });

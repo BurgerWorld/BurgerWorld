@@ -99,20 +99,27 @@ ol {
 
 #text-panel,
 #stickers-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
     background-color: var(--modal-background);
     border-radius: 8px;
     padding: 20px;
-    position: fixed; /* Change from absolute to fixed */
+    position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Center both vertically and horizontally */
-    width: 90%; /* Reduce width for better fit on all screens */
-    max-width: 500px; /* Maximum width for larger screens */
-    max-height: 80vh; /* Maximum height to ensure it doesn't overflow the viewport */
-    overflow-y: auto; /* Allow scrolling if content is too tall */
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    display: none;
-    z-index: 1000; /* Ensure it's above other content */
+    z-index: 1000;
+}
+
+#text-panel.show,
+#stickers-panel.show {
+    display: flex !important; /* Add !important to override any conflicting styles */
 }
 
 .text-input,
@@ -129,15 +136,43 @@ ol {
 
 #stickers-panel {
     display: none;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Responsive grid */
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--modal-background);
+    border-radius: 8px;
+    padding: 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+#stickers-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 10px;
     justify-items: center;
-    align-content: start; /* Align grid items to the top */
-    padding-bottom: 60px; /* Space for the close button */
+    align-content: start;
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+#close-stickers {
+    margin-top: 20px;
+    width: auto; /* Change from 100% to auto */
+    min-width: 100px; /* Add a minimum width */
+    max-width: 200px;
+    align-self: center; /* Center the button within the flex container */
 }
 
 #stickers-panel.show {
-    display: grid;
+    display: flex;
 }
 
 .sticker {
@@ -150,22 +185,6 @@ ol {
 
 .sticker:hover {
     transform: scale(1.2); /* Slight hover effect */
-}
-
-#close-stickers {
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-    padding: 10px;
-    background-color: var(--button-background);
-    color: var(--button-text);
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-#close-stickers:hover {
-    background-color: var(--button-hover);
 }
 
 #meme-stage {
@@ -246,41 +265,38 @@ ol {
 
     <div id="stickers-panel" class="modal">
         <h2>Select a Sticker</h2>
-        
-        <!-- Your sticker images -->
-        <img src="./Stickers/BW Gold Skewer.png" class="sticker" alt="BW Gold Skewer">
-        <img src="./Stickers/BW Pick Flag Black.png" class="sticker" alt="BW Pick Flag Black">
-        <img src="./Stickers/BW Pick Flag Red.png" class="sticker" alt="BW Pick Flag Red">
-        <img src="./Stickers/BW Plastic Pick Black.png" class="sticker" alt="BW Plastic Pick Black">
-        <img src="./Stickers/BW Plastic Pick Red.png" class="sticker" alt="BW Plastic Pick Red">
-        <img src="./Stickers/Big if True.png" class="sticker" alt="Big if True">
-        <img src="./Stickers/CTO Caddy.png" class="sticker" alt="CTO Caddy">
-        <img src="./Stickers/Cheese and Bacon on Bamboo.png" class="sticker" alt="Cheese and Bacon on Bamboo">
-        <img src="./Stickers/Chilis.png" class="sticker" alt="Chilis">
-        <img src="./Stickers/Employee of the Month.png" class="sticker" alt="Employee of the Month">
-        <img src="./Stickers/Fries.png" class="sticker" alt="Fries">
-        <img src="./Stickers/GBurger Cheeses.png" class="sticker" alt="GBurger Cheeses">
-        <img src="./Stickers/GBurger Red.png" class="sticker" alt="GBurger Red">
-        <img src="./Stickers/Goblin Inspection.png" class="sticker" alt="Goblin Inspection">
-        <img src="./Stickers/Great Again Burger.png" class="sticker" alt="Great Again Burger">
-        <img src="./Stickers/Help Wanted.png" class="sticker" alt="Help Wanted">
-        <img src="./Stickers/Inspector.png" class="sticker" alt="Inspector">
-        <img src="./Stickers/LFG Bacon.png" class="sticker" alt="LFG Bacon">
-        <img src="./Stickers/Mayo.png" class="sticker" alt="Mayo">
-        <img src="./Stickers/Onion Ring.png" class="sticker" alt="Onion Ring">
-        <img src="./Stickers/Onion Rings.png" class="sticker" alt="Onion Rings">
-        <img src="./Stickers/Onion.png" class="sticker" alt="Onion">
-        <img src="./Stickers/REKT.png" class="sticker" alt="REKT">
-        <img src="./Stickers/Sauce Heart.png" class="sticker" alt="Sauce Heart">
-        <img src="./Stickers/Skewered Rat.png" class="sticker" alt="Skewered Rat">
-        <img src="./Stickers/Tomato.png" class="sticker" alt="Tomato">
-        <img src="./Stickers/Zapper Sticker Black.png" class="sticker" alt="Zapper Sticker Black">
-        <img src="./Stickers/Zapper Sticker Red.png" class="sticker" alt="Zapper Sticker Red">
-        
-        <br><br>
-        <!-- Close button -->
+        <div id="stickers-container">
+            <img src="./Stickers/BW Gold Skewer.png" class="sticker" alt="BW Gold Skewer">
+            <img src="./Stickers/BW Pick Flag Black.png" class="sticker" alt="BW Pick Flag Black">
+            <img src="./Stickers/BW Pick Flag Red.png" class="sticker" alt="BW Pick Flag Red">
+            <img src="./Stickers/BW Plastic Pick Black.png" class="sticker" alt="BW Plastic Pick Black">
+            <img src="./Stickers/BW Plastic Pick Red.png" class="sticker" alt="BW Plastic Pick Red">
+            <img src="./Stickers/Big if True.png" class="sticker" alt="Big if True">
+            <img src="./Stickers/CTO Caddy.png" class="sticker" alt="CTO Caddy">
+            <img src="./Stickers/Cheese and Bacon on Bamboo.png" class="sticker" alt="Cheese and Bacon on Bamboo">
+            <img src="./Stickers/Chilis.png" class="sticker" alt="Chilis">
+            <img src="./Stickers/Employee of the Month.png" class="sticker" alt="Employee of the Month">
+            <img src="./Stickers/Fries.png" class="sticker" alt="Fries">
+            <img src="./Stickers/GBurger Cheeses.png" class="sticker" alt="GBurger Cheeses">
+            <img src="./Stickers/GBurger Red.png" class="sticker" alt="GBurger Red">
+            <img src="./Stickers/Goblin Inspection.png" class="sticker" alt="Goblin Inspection">
+            <img src="./Stickers/Great Again Burger.png" class="sticker" alt="Great Again Burger">
+            <img src="./Stickers/Help Wanted.png" class="sticker" alt="Help Wanted">
+            <img src="./Stickers/Inspector.png" class="sticker" alt="Inspector">
+            <img src="./Stickers/LFG Bacon.png" class="sticker" alt="LFG Bacon">
+            <img src="./Stickers/Mayo.png" class="sticker" alt="Mayo">
+            <img src="./Stickers/Onion Ring.png" class="sticker" alt="Onion Ring">
+            <img src="./Stickers/Onion Rings.png" class="sticker" alt="Onion Rings">
+            <img src="./Stickers/Onion.png" class="sticker" alt="Onion">
+            <img src="./Stickers/REKT.png" class="sticker" alt="REKT">
+            <img src="./Stickers/Sauce Heart.png" class="sticker" alt="Sauce Heart">
+            <img src="./Stickers/Skewered Rat.png" class="sticker" alt="Skewered Rat">
+            <img src="./Stickers/Tomato.png" class="sticker" alt="Tomato">
+            <img src="./Stickers/Zapper Sticker Black.png" class="sticker" alt="Zapper Sticker Black">
+            <img src="./Stickers/Zapper Sticker Red.png" class="sticker" alt="Zapper Sticker Red">
+        </div>
         <button id="close-stickers" class="control-button">Close</button>
-      </div>
+    </div>
 
     <div id="text-panel" class="modal">
       <h2>Add Text</h2>
