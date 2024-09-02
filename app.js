@@ -1,5 +1,30 @@
 let stage, stageContainer, backgroundImage, layer, tr, transparentRect;
 
+// Move this function to the global scope, outside of any other function
+function addShapeEvents(shape) {
+    shape.on('mousedown touchstart', function (e) {
+        e.cancelBubble = true;
+        tr.nodes([shape]);
+        layer.batchDraw();
+    });
+
+    shape.on('transform', function () {
+        updateTransformer(shape);
+    });
+
+    shape.on('transformend', function () {
+        finalizeTransform(shape);
+    });
+}
+
+function updateTransformer(shape) {
+    // ... existing updateTransformer code ...
+}
+
+function finalizeTransform(shape) {
+    // ... existing finalizeTransform code ...
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     stageContainer = document.getElementById('meme-stage');
     const containerWidth = stageContainer.offsetWidth;
@@ -37,7 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
     tr = new Konva.Transformer({
         anchorSize: 20,
         padding: 5,
-        keepRatio: false, // Allow independent scaling in width and height
+        keepRatio: false,
+        enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
     });
     layer.add(tr);
 
@@ -64,101 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
     stage.on('contentTouchstart', function(e) {
         e.evt.preventDefault();
     });
-
-    function updateTransformer(shape) {
-        if (shape instanceof Konva.Group) {
-            const textNode = shape.findOne('Text');
-            const rect = shape.findOne('Rect');
-            if (textNode && rect) {
-                const newWidth = textNode.originalWidth * shape.scaleX();
-                const newHeight = textNode.originalHeight * shape.scaleY();
-
-                const widthScale = shape.scaleX();
-                const newFontSize = textNode.originalFontSize * widthScale;
-
-                textNode.fontSize(newFontSize);
-                textNode.width(newWidth);
-
-                const newTextHeight = textNode.height();
-
-                rect.width(newWidth);
-                rect.height(newHeight);
-
-                shape.size({
-                    width: newWidth,
-                    height: newHeight,
-                });
-
-                textNode.position({
-                    x: 0,
-                    y: 0,
-                });
-
-                textNode.verticalAlign('middle');
-            }
-        }
-    }
-
-    // Debounced function to limit how often updateTransformer is called
-    let transformTimeout;
-    function onTransform(shape) {
-        clearTimeout(transformTimeout);
-        transformTimeout = setTimeout(() => {
-            updateTransformer(shape);
-            layer.batchDraw();
-        }, 100); // Adjust delay as needed
-    }
-
-    function finalizeTransform(shape) {
-        if (shape instanceof Konva.Group) {
-            const textNode = shape.findOne('Text');
-            const rect = shape.findOne('Rect');
-
-            if (textNode && rect) {
-                const finalWidth = textNode.originalWidth * shape.scaleX();
-                const finalHeight = textNode.originalHeight * shape.scaleY();
-
-                const widthScale = shape.scaleX();
-                const newFontSize = textNode.originalFontSize * widthScale;
-                textNode.fontSize(newFontSize);
-
-                textNode.width(finalWidth);
-
-                const newTextHeight = textNode.height();
-
-                rect.width(finalWidth);
-                rect.height(finalHeight);
-                shape.size({
-                    width: finalWidth,
-                    height: finalHeight,
-                });
-
-                shape.scale({ x: 1, y: 1 });
-
-                textNode.position({ x: 0, y: 0 });
-                rect.position({ x: 0, y: 0 });
-
-                textNode.verticalAlign('middle');
-            }
-        }
-    }
-
-    function addShapeEvents(shape) {
-        shape.on('mousedown touchstart', function (e) {
-            e.cancelBubble = true;
-            tr.nodes([shape]);
-            layer.batchDraw();
-        });
-
-        shape.on('transform', function () {
-            onTransform(shape);
-        });
-
-        shape.on('transformend', function () {
-            finalizeTransform(shape);
-            layer.batchDraw();
-        });
-    }
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -209,60 +140,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('add-text-button').addEventListener('click', function () {
-        const newText = new Konva.Text({
-            text: document.getElementById('new-meme-text').value,
-            fontSize: 60,
-            fontFamily: document.getElementById('font-select').value,
-            fill: document.getElementById('color-picker').value,
-            stroke: document.getElementById('stroke-color-picker').value,
-            strokeWidth: parseInt(document.getElementById('stroke-width-slider').value, 10),
-            padding: 0,
-            align: 'center'
-        });
-        newText.originalFontSize = newText.fontSize();
-        newText.originalWidth = newText.width();
-        newText.originalHeight = newText.height();
+        const text = document.getElementById('new-meme-text').value;
+        if (text.trim() !== '') {  // Only add text if it's not empty
+            const textGroup = createTextGroup(text, stage.width() / 2, stage.height() / 2);
+            layer.add(textGroup);
+            tr.nodes([textGroup]);
+            layer.batchDraw();  // Use batchDraw instead of draw for better performance
 
-        const textWidth = newText.width();
-        const textHeight = newText.height();
+            // Close the text panel
+            document.getElementById('text-panel').style.display = 'none';
+            
+            // Clear the input field
+            document.getElementById('new-meme-text').value = '';
 
-        const textBackground = new Konva.Rect({
-            width: textWidth,
-            height: textHeight,
-            fill: 'transparent',
-        });
-
-        const group = new Konva.Group({
-            width: textWidth,
-            height: textHeight,
-            draggable: true
-        });
-        group.add(textBackground, newText);
-
-        group.position({
-            x: stage.width() / 2 - textWidth / 2,
-            y: stage.height() / 2 - textHeight / 2
-        });
-
-        layer.add(group);
-
-        newText.position({
-            x: 0,
-            y: 0
-        });
-
-        addShapeEvents(group);
-
-        tr.nodes([group]);
-        setTimeout(() => {
-            updateTransformer(group);
-            layer.draw();
-        }, 0);
-
-        document.getElementById('text-panel').style.display = 'none';
-        document.getElementById('new-meme-text').value = '';
-
-        window.dispatchEvent(new Event('resize'));
+            // Trigger resize event to ensure proper layout
+            window.dispatchEvent(new Event('resize'));
+        }
     });
 
     document.querySelectorAll('.sticker').forEach(function (sticker) {
@@ -326,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tr = new Konva.Transformer({
             anchorSize: 20,
             padding: 5,
+            enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
         });
         layer.add(tr);
         
@@ -440,3 +334,38 @@ function resizeStage() {
 }
 
 window.addEventListener('resize', resizeStage);
+
+function createTextGroup(text, x, y) {
+    const newText = new Konva.Text({
+        text: text,
+        fontSize: 60,
+        fontFamily: document.getElementById('font-select').value,
+        fill: document.getElementById('color-picker').value,
+        stroke: document.getElementById('stroke-color-picker').value,
+        strokeWidth: parseInt(document.getElementById('stroke-width-slider').value, 10),
+        padding: 0,
+        align: 'center'
+    });
+
+    const textWidth = newText.width();
+    const textHeight = newText.height();
+
+    const textBackground = new Konva.Rect({
+        width: textWidth,
+        height: textHeight,
+        fill: 'transparent',
+    });
+
+    const group = new Konva.Group({
+        x: x - textWidth / 2,
+        y: y - textHeight / 2,
+        width: textWidth,
+        height: textHeight,
+        draggable: true
+    });
+    group.add(textBackground, newText);
+
+    addShapeEvents(group);
+
+    return group;
+}
