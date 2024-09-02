@@ -56,6 +56,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    stage.on('contentTouchstart', function(e) {
+        e.evt.preventDefault();
+    });
+
     function addShapeEvents(shape) {
         shape.on('mousedown touchstart', function (e) {
             e.cancelBubble = true;
@@ -359,58 +363,42 @@ stage.content.addEventListener('touchstart', function (e) {
 
 // Add this function at the end of your file, outside the DOMContentLoaded event listener
 function addPinchZoomToShape(shape) {
-    let lastCenter = null;
     let lastDist = 0;
+    let startScale = 1;
 
-    shape.on('touchstart touchmove', function (e) {
-        e.evt.preventDefault();
+    shape.on('touchstart', function(e) {
         const touch1 = e.evt.touches[0];
         const touch2 = e.evt.touches[1];
 
         if (touch1 && touch2) {
-            // If we have two touches, it's a pinch gesture
-            const center = {
-                x: (touch1.clientX + touch2.clientX) / 2,
-                y: (touch1.clientY + touch2.clientY) / 2,
-            };
+            lastDist = getDistance(touch1, touch2);
+            startScale = shape.scaleX();
+        }
+    });
 
-            const dist = Math.sqrt(
-                Math.pow(touch1.clientX - touch2.clientX, 2) +
-                Math.pow(touch1.clientY - touch2.clientY, 2)
-            );
+    shape.on('touchmove', function(e) {
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
 
-            if (!lastCenter) {
-                lastCenter = center;
-                lastDist = dist;
-                return;
-            }
+        if (touch1 && touch2) {
+            e.evt.preventDefault();
+            e.evt.stopPropagation();
 
-            const scale = shape.scaleX() * (dist / lastDist);
+            const dist = getDistance(touch1, touch2);
+            const scale = (startScale * dist) / lastDist;
 
-            const stagePoint = shape.getStage().getPointerPosition();
-            const centerPoint = shape.getAbsolutePosition();
-
-            const oldScale = shape.scaleX();
-            const newScale = oldScale * (dist / lastDist);
-
-            shape.scale({ x: newScale, y: newScale });
-
-            const newPos = {
-                x: stagePoint.x - (stagePoint.x - centerPoint.x) * (newScale / oldScale),
-                y: stagePoint.y - (stagePoint.y - centerPoint.y) * (newScale / oldScale),
-            };
-
-            shape.position(newPos);
-
-            lastDist = dist;
-            lastCenter = center;
+            shape.scaleX(scale);
+            shape.scaleY(scale);
 
             shape.getLayer().batchDraw();
         }
     });
 
-    shape.on('touchend', function () {
-        lastCenter = null;
+    shape.on('touchend', function() {
         lastDist = 0;
     });
+
+    function getDistance(p1, p2) {
+        return Math.sqrt(Math.pow(p2.clientX - p1.clientX, 2) + Math.pow(p2.clientY - p1.clientY, 2));
+    }
 }
