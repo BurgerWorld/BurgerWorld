@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const stageContainer = document.getElementById('meme-stage');
+    const containerWidth = stageContainer.offsetWidth;
+
     const stage = new Konva.Stage({
         container: 'meme-stage',
-        width: 500,
-        height: 500,
+        width: containerWidth,
+        height: containerWidth,
     });
 
     let layer = new Konva.Layer();
@@ -94,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             imageObj.onload = function () {
                 console.log('Background image loaded');
                 backgroundImage.image(imageObj);
+                resizeStage(); // Call resizeStage to adjust the image size
                 layer.draw();
             };
         };
@@ -277,3 +281,29 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('stroke-color-picker').addEventListener('change', updatePreview);
     document.getElementById('stroke-width-slider').addEventListener('input', updatePreview);
 });
+
+function resizeStage() {
+    const containerWidth = stageContainer.offsetWidth;
+    stage.width(containerWidth);
+    stage.height(containerWidth);
+
+    // Resize background image
+    if (backgroundImage.image()) {
+        const imageWidth = backgroundImage.image().width;
+        const imageHeight = backgroundImage.image().height;
+        const scale = Math.max(containerWidth / imageWidth, containerWidth / imageHeight);
+        
+        backgroundImage.width(imageWidth * scale);
+        backgroundImage.height(imageHeight * scale);
+        backgroundImage.x((containerWidth - imageWidth * scale) / 2);
+        backgroundImage.y((containerWidth - imageHeight * scale) / 2);
+    }
+
+    // Resize transparent rectangle
+    transparentRect.width(containerWidth);
+    transparentRect.height(containerWidth);
+
+    layer.batchDraw();
+}
+
+window.addEventListener('resize', resizeStage);

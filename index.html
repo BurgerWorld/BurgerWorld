@@ -167,12 +167,11 @@ ol {
     border: 2px solid var(--meme-stage-border-color);
     background-color: var(--meme-stage-bg-color);
     max-width: 100%;
-    max-height: 500px;
-    width: auto;
-    height: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%; /* This creates a square aspect ratio */
+    position: relative;
+    overflow: hidden;
 }
 
 #text-preview {
