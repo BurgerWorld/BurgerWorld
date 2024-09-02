@@ -71,14 +71,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const textNode = shape.findOne('Text');
             const rect = shape.findOne('Rect');
             if (textNode && rect) {
-                const scaleX = textNode.scaleX();
-                const scaleY = textNode.scaleY();
+                const scaleX = shape.scaleX();
+                const scaleY = shape.scaleY();
 
-                // Adjust width and height based on scale
-                const newWidth = textNode.width() * scaleX;
-                const newHeight = textNode.height() * scaleY;
+                // Update text properties
+                const newFontSize = textNode.fontSize() * scaleX;
+                textNode.fontSize(newFontSize);
 
-                // Update rectangle size to match text size exactly
+                // Adjust width and height based on new font size
+                textNode.width('auto');
+                textNode.height('auto');
+                
+                const newWidth = textNode.width();
+                const newHeight = textNode.height();
+
+                // Update rectangle size to match text size
                 rect.width(newWidth);
                 rect.height(newHeight);
 
@@ -92,13 +99,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     y: 0,
                 });
 
-                // Reset textNode and shape scales
-                textNode.scale({ x: 1, y: 1 });
+                // Update group size to match content
                 shape.size({
                     width: newWidth,
                     height: newHeight,
                 });
+
+                // Reset scales
+                textNode.scale({ x: 1, y: 1 });
+                shape.scale({ x: 1, y: 1 });
             }
+        } else if (shape instanceof Konva.Image) {
+            // Handle stickers (Konva.Image)
+            const scaleX = shape.scaleX();
+            const scaleY = shape.scaleY();
+            const newWidth = shape.width() * scaleX;
+            const newHeight = shape.height() * scaleY;
+
+            shape.size({
+                width: newWidth,
+                height: newHeight,
+            });
+            shape.scale({ x: 1, y: 1 }); // Reset scale after adjusting size
         }
         tr.forceUpdate();
         layer.batchDraw();
@@ -116,11 +138,13 @@ document.addEventListener('DOMContentLoaded', function () {
             updateTransformer(shape);
         });
 
-        shape.on('transformend dragend', function () {
+        shape.on('transform', function () {
             updateTransformer(shape);
         });
 
-        addPinchZoomToShape(shape);
+        shape.on('transformend dragend', function () {
+            updateTransformer(shape);
+        });
     }
 
     document.addEventListener('keydown', function (e) {
@@ -437,58 +461,3 @@ function resizeStage() {
 }
 
 window.addEventListener('resize', resizeStage);
-
-function addPinchZoomToShape(shape) {
-    let lastDist = 0;
-    let startScale = 1;
-    let isPinching = false;
-
-    shape.on('touchstart', function(e) {
-        const touch1 = e.evt.touches[0];
-        const touch2 = e.evt.touches[1];
-
-        if (touch1 && touch2) {
-            isPinching = true;
-            lastDist = getDistance(touch1, touch2);
-            startScale = shape.scaleX();
-        }
-    });
-
-    shape.on('touchmove', function(e) {
-        if (!isPinching) return;
-
-        const touch1 = e.evt.touches[0];
-        const touch2 = e.evt.touches[1];
-
-        if (touch1 && touch2) {
-            e.evt.preventDefault();
-            e.evt.stopPropagation();
-
-            const dist = getDistance(touch1, touch2);
-            const scale = (startScale * dist) / lastDist;
-
-            // Limit the scale to a reasonable range
-            const limitedScale = Math.max(0.1, Math.min(5, scale));
-
-            if (shape instanceof Konva.Group) {
-                const textNode = shape.findOne('Text');
-                if (textNode) {
-                    textNode.scale({ x: limitedScale, y: limitedScale });
-                    updateTransformer(shape);
-                }
-            } else {
-                shape.scale({ x: limitedScale, y: limitedScale });
-                updateTransformer(shape);
-            }
-        }
-    });
-
-    shape.on('touchend', function() {
-        isPinching = false;
-        lastDist = 0;
-    });
-
-    function getDistance(p1, p2) {
-        return Math.sqrt(Math.pow(p2.clientX - p1.clientX, 2) + Math.pow(p2.clientY - p1.clientY, 2));
-    }
-}
