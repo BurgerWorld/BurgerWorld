@@ -36,28 +36,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function resetTransformer() {
         tr.nodes([]);
-        layer.add(tr); // Ensure the transformer is added to the layer
-        tr.moveToTop(); // Move transformer to the top of the layer
+        layer.add(tr);
+        tr.moveToTop();
     }
 
-    transparentRect.on('click', function () {
-        console.log('Transparent Rect clicked');
-        resetTransformer();
-        layer.draw();
+    transparentRect.on('mousedown touchstart', function (e) {
+        console.log('Transparent Rect clicked/touched');
+        if (e.target === transparentRect) {
+            resetTransformer();
+            layer.draw();
+        }
+    });
+
+    stage.on('mousedown touchstart', function (e) {
+        if (e.target === stage) {
+            console.log('Stage clicked/touched');
+            resetTransformer();
+            layer.draw();
+        }
     });
 
     function addShapeEvents(shape) {
-        shape.on('click', function (e) {
+        shape.on('mousedown touchstart', function (e) {
             e.cancelBubble = true;
-            console.log('Shape clicked and transformer applied');
+            console.log('Shape clicked/touched and transformer applied');
             tr.nodes([shape]);
-            tr.getLayer().batchDraw(); // Force the transformer to update
+            tr.getLayer().batchDraw();
         });
 
         shape.on('transformend dragend', function () {
             console.log('Transform or Drag Ended');
             layer.batchDraw();
         });
+
+        // Add pinch-to-zoom functionality
+        addPinchZoomToShape(shape);
     }
 
     document.addEventListener('keydown', function (e) {
@@ -97,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
             imageObj.onload = function () {
                 console.log('Background image loaded');
                 backgroundImage.image(imageObj);
-                resizeStage(); // Call resizeStage to adjust the image size
+                resizeStage();
                 layer.draw();
             };
         };
@@ -115,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('text-panel').style.display = 'none';
     });
 
-    document.getElementById('add-text-button').addEventListener('click', function () {
+    document.getElementById('add-text-button').addEventListener('click', function (e) {
         const newText = new Konva.Text({
             x: 50,
             y: 50,
@@ -133,14 +146,14 @@ document.addEventListener('DOMContentLoaded', function () {
         layer.add(newText);
         addShapeEvents(newText);
         tr.nodes([newText]);
-        tr.getLayer().batchDraw(); // Ensure the transformer is correctly linked
+        tr.getLayer().batchDraw();
         layer.draw();
 
         document.getElementById('text-panel').style.display = 'none';
     });
 
     document.querySelectorAll('.sticker').forEach(function (sticker) {
-        sticker.addEventListener('click', function () {
+        sticker.addEventListener('click', function (e) {
             console.log('Sticker selected:', sticker.alt);
             const stickerImage = new Image();
             stickerImage.crossOrigin = "Anonymous";
@@ -148,17 +161,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
             stickerImage.onload = function () {
                 console.log('Sticker image loaded');
+                const stageWidth = stage.width();
+                const stageHeight = stage.height();
+                
+                // Calculate the scale to fit the sticker within 1/3 of the stage
+                const scale = Math.min(
+                    (stageWidth / 3) / stickerImage.width,
+                    (stageHeight / 3) / stickerImage.height
+                );
+
                 const konvaSticker = new Konva.Image({
-                    x: 50,
-                    y: 50,
                     image: stickerImage,
                     draggable: true,
+                    width: stickerImage.width * scale,
+                    height: stickerImage.height * scale,
+                });
+
+                // Center the sticker
+                konvaSticker.position({
+                    x: (stageWidth - konvaSticker.width()) / 2,
+                    y: (stageHeight - konvaSticker.height()) / 2,
                 });
 
                 layer.add(konvaSticker);
                 addShapeEvents(konvaSticker);
                 tr.nodes([konvaSticker]);
-                tr.getLayer().batchDraw(); // Ensure the transformer is correctly linked
+                tr.getLayer().batchDraw();
                 layer.draw();
                 stickersPanel.style.display = 'none';
             };
@@ -199,10 +227,12 @@ document.addEventListener('DOMContentLoaded', function () {
         layer.add(tr);
         
         // Reattach the click event listener to the transparent rectangle
-        transparentRect.on('click', function () {
-            console.log('Transparent Rect clicked');
-            resetTransformer();
-            layer.draw();
+        transparentRect.on('mousedown touchstart', function (e) {
+            console.log('Transparent Rect clicked/touched');
+            if (e.target === transparentRect) {
+                resetTransformer();
+                layer.draw();
+            }
         });
 
         // Clear file input
@@ -303,7 +333,89 @@ function resizeStage() {
     transparentRect.width(containerWidth);
     transparentRect.height(containerWidth);
 
+    // Resize and reposition all stickers
+    layer.children.forEach(function(child) {
+        if (child instanceof Konva.Image && child !== backgroundImage) {
+            const oldScale = child.scaleX();
+            const newScale = (containerWidth / stage.width()) * oldScale;
+            child.scale({ x: newScale, y: newScale });
+            
+            // Adjust position proportionally
+            const newX = (child.x() * containerWidth) / stage.width();
+            const newY = (child.y() * containerWidth) / stage.height();
+            child.position({ x: newX, y: newY });
+        }
+    });
+
     layer.batchDraw();
 }
 
 window.addEventListener('resize', resizeStage);
+
+// Prevent default touch behavior to avoid scrolling issues
+stage.content.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+}, { passive: false });
+
+// Add this function at the end of your file, outside the DOMContentLoaded event listener
+function addPinchZoomToShape(shape) {
+    let lastCenter = null;
+    let lastDist = 0;
+
+    shape.on('touchmove', function (e) {
+        e.evt.preventDefault();
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
+
+        if (touch1 && touch2) {
+            // If we have two touches, it's a pinch gesture
+            const center = {
+                x: (touch1.clientX + touch2.clientX) / 2,
+                y: (touch1.clientY + touch2.clientY) / 2,
+            };
+
+            if (!lastCenter) {
+                lastCenter = center;
+                return;
+            }
+
+            const dist = Math.sqrt(
+                Math.pow(touch1.clientX - touch2.clientX, 2) +
+                Math.pow(touch1.clientY - touch2.clientY, 2)
+            );
+
+            if (!lastDist) {
+                lastDist = dist;
+            }
+
+            const pointTo = {
+                x: (center.x - shape.getAbsolutePosition().x) / shape.scaleX(),
+                y: (center.y - shape.getAbsolutePosition().y) / shape.scaleY(),
+            };
+
+            const scale = shape.scaleX() * (dist / lastDist);
+
+            shape.scale({ x: scale, y: scale });
+
+            const dx = center.x - lastCenter.x;
+            const dy = center.y - lastCenter.y;
+
+            const newPos = {
+                x: shape.x() + dx,
+                y: shape.y() + dy,
+            };
+
+            shape.position(newPos);
+
+            lastDist = dist;
+            lastCenter = center;
+
+            shape.getLayer().batchDraw();
+        }
+    });
+
+    shape.on('touchend', function () {
+        lastCenter = null;
+        lastDist = 0;
+    });
+}

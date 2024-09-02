@@ -100,13 +100,17 @@ ol {
     background-color: var(--panel-bg-color);
     border-radius: 8px;
     padding: 20px;
-    position: absolute;
-    top: 50px;
+    position: fixed; /* Change from absolute to fixed */
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 500px;  /* Width to fit more stickers */
+    transform: translate(-50%, -50%); /* Center both vertically and horizontally */
+    width: 90%; /* Reduce width for better fit on all screens */
+    max-width: 500px; /* Maximum width for larger screens */
+    max-height: 80vh; /* Maximum height to ensure it doesn't overflow the viewport */
+    overflow-y: auto; /* Allow scrolling if content is too tall */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     display: none;
+    z-index: 1000; /* Ensure it's above other content */
 }
 
 .text-input,
@@ -123,10 +127,11 @@ ol {
 
 #stickers-panel {
     display: none;
-    grid-template-columns: repeat(4, 1fr); /* 4 stickers per row */
-    gap: 10px; /* Space between stickers */
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Responsive grid */
+    gap: 10px;
     justify-items: center;
-    grid-template-rows: auto auto 50px; /* Allow for a bottom row for the button */
+    align-content: start; /* Align grid items to the top */
+    padding-bottom: 60px; /* Space for the close button */
 }
 
 #stickers-panel.show {
@@ -134,8 +139,9 @@ ol {
 }
 
 .sticker {
-    width: 100px;
-    height: 100px;
+    width: 80px; /* Slightly smaller for better fit on mobile */
+    height: 80px;
+    object-fit: contain; /* Maintain aspect ratio */
     cursor: pointer;
     transition: transform 0.3s ease;
 }
@@ -145,17 +151,15 @@ ol {
 }
 
 #close-stickers {
-    grid-column: span 4; /* Make the button span across all columns */
-    align-self: end;
-    background-color: var(--button-bg-color);
-    border: none;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
     padding: 10px;
+    background-color: var(--button-bg-color);
     color: var(--button-text-color);
-    font-size: 16px;
-    border-radius: 5px;
+    border: none;
     cursor: pointer;
-    text-align: center;
-    margin-top: 10px; /* Space between stickers and the button */
+    margin-top: 10px;
 }
 
 #close-stickers:hover {
@@ -188,16 +192,19 @@ ol {
     }
 
     .container {
-        width: calc(100% - 20px); /* Ensure the container fits within the viewport */
-        margin: 0 auto; /* Center the container on mobile screens */
-        box-sizing: border-box; /* Ensure padding is included in width */
+        width: 100%;
+        padding: 10px;
     }
 
     #text-panel,
     #stickers-panel {
-        width: 90%; /* Reduce width for better fit on mobile screens */
-        left: 50%;
-        transform: translateX(-50%);
+        width: 95%; /* Even more width on very small screens */
+        padding: 15px;
+    }
+
+    .sticker {
+        width: 60px; /* Even smaller on very small screens */
+        height: 60px;
     }
 }
 
