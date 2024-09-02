@@ -15,18 +15,18 @@
 
 /* Color Variables */
 :root {
-    --background-color: #fbe8a6; /* Body Background */
-    --text-color: #333; /* General Text Color */
-    --container-bg-color: #ffcc00; /* Container Background */
-    --heading-color: #d52b1e; /* Heading Text Color */
-    --paragraph-color: #d52b1e; /* Paragraph Text Color */
-    --button-bg-color: #d52b1e; /* Button Background */
-    --button-hover-bg-color: #b1201a; /* Button Background on Hover */
-    --button-text-color: #ffcc00; /* Button Text Color */
-    --panel-bg-color: #fff; /* Panel Background */
-    --panel-border-color: #ccc; /* Panel Border */
-    --meme-stage-border-color: #d52b1e; /* Meme Stage Border */
-    --meme-stage-bg-color: #ffcc00; /* Meme Stage Background */
+    --background-color: #fbe8a6; /* Body Background - Light Warm Beige/Cream */
+    --text-color: #333; /* General Text Color - Dark Gray */
+    --container-bg-color: #ffcc00; /* Container Background - McDonald's Yellow */
+    --heading-color: #d52b1e; /* Heading Text Color - McDonald's Red */
+    --paragraph-color: #d52b1e; /* Paragraph Text Color - McDonald's Red */
+    --button-bg-color: #d52b1e; /* Button Background - McDonald's Red */
+    --button-hover-bg-color: #b1201a; /* Button Background on Hover - Slightly Darker Red */
+    --button-text-color: #ffcc00; /* Button Text Color - McDonald's Yellow */
+    --panel-bg-color: #fff; /* Panel Background - White */
+    --panel-border-color: #ccc; /* Panel Border - Light Gray */
+    --meme-stage-border-color: #d52b1e; /* Meme Stage Border - McDonald's Red */
+    --meme-stage-bg-color: #ffcc00; /* Meme Stage Background - McDonald's Yellow */
 }
 
 /* Global Styles */
@@ -35,34 +35,36 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     margin: 0;
-    padding: 20px;
+    padding: 5vw; /* Responsive padding */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    box-sizing: border-box;
 }
 
 /* Container Styles */
 .container {
-    max-width: 800px;
+    width: 100%;
+    max-width: 100vw; /* Full viewport width */
     margin: 0 auto;
     text-align: center;
     background-color: var(--container-bg-color);
     border-radius: 8px;
-    padding: 20px;
+    padding: 5vw; /* Responsive padding */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Header and Text Styles */
 h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
+    font-size: 6vw; /* Responsive font size */
+    margin-bottom: 5vw; /* Responsive margin */
     color: var(--heading-color);
 }
 
 p, ol {
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 4.5vw; /* Responsive font size */
+    margin-bottom: 5vw; /* Responsive margin */
     color: var(--paragraph-color);
     text-align: left;
 }
@@ -72,19 +74,19 @@ p, ol {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 5vw; /* Responsive margin */
 }
 
 .control-button {
     background-color: var(--button-bg-color);
     border: none;
-    padding: 10px;
-    margin: 5px;
+    padding: 3vw; /* Responsive padding */
+    margin: 2vw; /* Responsive margin */
     color: var(--button-text-color);
-    font-size: 16px;
+    font-size: 4vw; /* Responsive font size */
     border-radius: 5px;
     cursor: pointer;
-    flex: 1;
+    flex: 1 1 auto; /* Responsive flex */
 }
 
 .control-button:hover {
@@ -96,12 +98,12 @@ p, ol {
 #stickers-panel {
     background-color: var(--panel-bg-color);
     border-radius: 8px;
-    padding: 20px;
+    padding: 5vw; /* Responsive padding */
     position: absolute;
-    top: 50px;
+    top: 10vw; /* Responsive positioning */
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
+    width: 90vw; /* 90% of the viewport width */
     max-width: 500px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     display: none;
@@ -121,8 +123,8 @@ p, ol {
 }
 
 .sticker {
-    width: 100px;
-    height: 100px;
+    width: 20vw; /* Responsive size */
+    height: 20vw; /* Responsive size */
     cursor: pointer;
     transition: transform 0.3s ease;
 }
@@ -137,13 +139,13 @@ p, ol {
     align-self: end;
     background-color: var(--button-bg-color);
     border: none;
-    padding: 10px;
+    padding: 3vw; /* Responsive padding */
     color: var(--button-text-color);
-    font-size: 16px;
+    font-size: 4vw; /* Responsive font size */
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 5vw; /* Responsive margin */
 }
 
 #close-stickers:hover {
@@ -152,13 +154,13 @@ p, ol {
 
 /* Meme Stage */
 #meme-stage {
-    margin: 20px auto;
+    margin: 5vw auto; /* Responsive margin */
     border: 2px solid var(--meme-stage-border-color);
     background-color: var(--meme-stage-bg-color);
-    max-width: 100%;
-    max-height: 500px;
-    width: auto;
+    width: 90vw; /* 90% of the viewport width */
     height: auto;
+    max-width: 100%;
+    max-height: 50vh; /* Restrict to half viewport height */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -167,55 +169,55 @@ p, ol {
 /* Text Preview */
 #text-preview {
     width: 100%;
-    height: 100px;
+    height: 20vw; /* Responsive height */
     border: 1px solid var(--panel-border-color);
-    margin-bottom: 10px;
+    margin-bottom: 5vw; /* Responsive margin */
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     h1 {
-        font-size: 28px;
+        font-size: 7vw;
     }
 
     p, ol {
-        font-size: 16px;
+        font-size: 5vw;
     }
 
     .control-button {
-        font-size: 14px;
-        padding: 8px;
+        font-size: 4.5vw;
+        padding: 4vw;
     }
 
     #text-panel,
     #stickers-panel {
-        width: 95%;
+        width: 95vw;
     }
 }
 
 @media (max-width: 480px) {
     h1 {
-        font-size: 24px;
+        font-size: 8vw;
     }
 
     p, ol {
-        font-size: 14px;
+        font-size: 6vw;
     }
 
     .control-button {
-        font-size: 12px;
-        padding: 6px;
+        font-size: 5vw;
+        padding: 4vw;
     }
 
     .sticker {
-        width: 80px;
-        height: 80px;
+        width: 18vw;
+        height: 18vw;
     }
 
     #text-panel,
     #stickers-panel {
-        width: 100%;
-        padding: 15px;
+        width: 100vw;
+        padding: 4vw;
     }
 }
 
