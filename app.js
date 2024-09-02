@@ -362,7 +362,7 @@ function addPinchZoomToShape(shape) {
     let lastCenter = null;
     let lastDist = 0;
 
-    shape.on('touchmove', function (e) {
+    shape.on('touchstart touchmove', function (e) {
         e.evt.preventDefault();
         const touch1 = e.evt.touches[0];
         const touch2 = e.evt.touches[1];
@@ -374,35 +374,30 @@ function addPinchZoomToShape(shape) {
                 y: (touch1.clientY + touch2.clientY) / 2,
             };
 
-            if (!lastCenter) {
-                lastCenter = center;
-                return;
-            }
-
             const dist = Math.sqrt(
                 Math.pow(touch1.clientX - touch2.clientX, 2) +
                 Math.pow(touch1.clientY - touch2.clientY, 2)
             );
 
-            if (!lastDist) {
+            if (!lastCenter) {
+                lastCenter = center;
                 lastDist = dist;
+                return;
             }
-
-            const pointTo = {
-                x: (center.x - shape.getAbsolutePosition().x) / shape.scaleX(),
-                y: (center.y - shape.getAbsolutePosition().y) / shape.scaleY(),
-            };
 
             const scale = shape.scaleX() * (dist / lastDist);
 
-            shape.scale({ x: scale, y: scale });
+            const stagePoint = shape.getStage().getPointerPosition();
+            const centerPoint = shape.getAbsolutePosition();
 
-            const dx = center.x - lastCenter.x;
-            const dy = center.y - lastCenter.y;
+            const oldScale = shape.scaleX();
+            const newScale = oldScale * (dist / lastDist);
+
+            shape.scale({ x: newScale, y: newScale });
 
             const newPos = {
-                x: shape.x() + dx,
-                y: shape.y() + dy,
+                x: stagePoint.x - (stagePoint.x - centerPoint.x) * (newScale / oldScale),
+                y: stagePoint.y - (stagePoint.y - centerPoint.y) * (newScale / oldScale),
             };
 
             shape.position(newPos);
