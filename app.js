@@ -1,4 +1,4 @@
-let stage, stageContainer, backgroundImage, layer, tr;
+let stage, stageContainer, backgroundImage, layer, tr, transparentRect;
 
 document.addEventListener('DOMContentLoaded', function () {
     stageContainer = document.getElementById('meme-stage');
@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', function () {
         width: containerWidth,
         height: containerWidth,
     });
+
+    stage.content.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+    }, { passive: false });
 
     layer = new Konva.Layer();
     stage.add(layer);
@@ -21,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     layer.add(backgroundImage);
 
-    let transparentRect = new Konva.Rect({
+    transparentRect = new Konva.Rect({
         x: 0,
         y: 0,
         width: stage.width(),
@@ -67,31 +71,32 @@ document.addEventListener('DOMContentLoaded', function () {
             const textNode = shape.findOne('Text');
             const rect = shape.findOne('Rect');
             if (textNode && rect) {
-                const scale = textNode.scaleX();
-                const newWidth = textNode.width() * scale;
-                const newHeight = textNode.height() * scale;
-                const padding = 5; // Reduced padding even further
+                const scaleX = textNode.scaleX();
+                const scaleY = textNode.scaleY();
 
-                rect.width(newWidth + padding);
-                rect.height(newHeight + padding);
-                rect.offsetX(newWidth / 2 + padding / 2);
-                rect.offsetY(newHeight / 2 + padding / 2);
+                // Adjust width and height based on scale
+                const newWidth = textNode.width() * scaleX;
+                const newHeight = textNode.height() * scaleY;
 
-                // Center the text within the rectangle
+                // Update rectangle size to match text size exactly
+                rect.width(newWidth);
+                rect.height(newHeight);
+
+                // Align the text and rectangle
+                rect.offsetX(0);
+                rect.offsetY(0);
+
+                // Position the text at (0, 0) within the group
                 textNode.position({
-                    x: padding / 2,
-                    y: padding / 2
+                    x: 0,
+                    y: 0,
                 });
 
-                // Reset scales
-                shape.scale({ x: 1, y: 1 });
-                rect.scale({ x: 1, y: 1 });
-                // We don't reset textNode scale here
-
-                // Update group size to match content
+                // Reset textNode and shape scales
+                textNode.scale({ x: 1, y: 1 });
                 shape.size({
-                    width: newWidth + padding,
-                    height: newHeight + padding
+                    width: newWidth,
+                    height: newHeight,
                 });
             }
         }
@@ -102,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function addShapeEvents(shape) {
         shape.on('mousedown touchstart', function (e) {
             e.cancelBubble = true;
-            console.log('Shape clicked/touched and transformer applied');
             tr.nodes([shape]);
             updateTransformer(shape);
             layer.batchDraw();
@@ -113,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         shape.on('transformend dragend', function () {
-            console.log('Transform or Drag Ended');
             updateTransformer(shape);
         });
 
@@ -185,33 +188,40 @@ document.addEventListener('DOMContentLoaded', function () {
             fill: document.getElementById('color-picker').value,
             stroke: document.getElementById('stroke-color-picker').value,
             strokeWidth: parseInt(document.getElementById('stroke-width-slider').value, 10),
+            padding: 0, // Ensures no padding
+            align: 'center' // Aligns text to the center
         });
 
         console.log('New text added:', newText.text());
 
         const textWidth = newText.width();
         const textHeight = newText.height();
-        const padding = 5; // Reduced padding
 
         const textBackground = new Konva.Rect({
-            width: textWidth + padding,
-            height: textHeight + padding,
+            width: textWidth,
+            height: textHeight,
             fill: 'transparent',
         });
 
         const group = new Konva.Group({
-            x: 50,
-            y: 50,
-            width: textWidth + padding,
-            height: textHeight + padding,
+            width: textWidth,
+            height: textHeight,
             draggable: true
         });
         group.add(textBackground, newText);
+
+        // Center the group in the stage
+        group.position({
+            x: stage.width() / 2 - textWidth / 2,
+            y: stage.height() / 2 - textHeight / 2
+        });
+
         layer.add(group);
 
+        // Position the text at (0, 0) within the group
         newText.position({
-            x: padding / 2,
-            y: padding / 2
+            x: 0,
+            y: 0
         });
 
         addShapeEvents(group);
@@ -427,10 +437,6 @@ function resizeStage() {
 }
 
 window.addEventListener('resize', resizeStage);
-
-stage.content.addEventListener('touchstart', function (e) {
-    e.preventDefault();
-}, { passive: false });
 
 function addPinchZoomToShape(shape) {
     let lastDist = 0;
